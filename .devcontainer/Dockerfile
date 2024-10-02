@@ -9,6 +9,19 @@
 # FROM nvidia/cuda:${CUDA_VERSION}-cudnn${CUDNN_V}-devel-ubuntu${UBUNTU_VERSION} AS base
 FROM nvcr.io/nvidia/pytorch:24.09-py3 as base
 
+# For coder
+USER root
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    bash \
+    ca-certificates \
+    curl \
+    git \
+    jq \
+    sudo \
+    && rm -rf /var/lib/apt/lists/*
+
 ARG DEBIAN_FRONTEND=noninteractive
 
 # [Optional] Uncomment this section to install additional OS packages.

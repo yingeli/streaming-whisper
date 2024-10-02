@@ -30,7 +30,8 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 # Do NOT modify UID from 1000
 # vscode updates this UID to the user building the container
-ARG USERNAME=developer
+# ARG USERNAME=developer
+ARG USERNAME=coder
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 

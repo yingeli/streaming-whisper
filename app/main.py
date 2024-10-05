@@ -6,7 +6,7 @@ from audio import AudioBuffer
 import json
 import time
 import asyncio;
-from transcribe import transcribe
+from recognize import recognize
 
 app = FastAPI()
 
@@ -22,8 +22,8 @@ async def realtime_transcribe(ws: WebSocket):
     async with asyncio.TaskGroup() as tg:
         tg.create_task(receive(ws, audio_buffer))
 
-        async for trans in transcribe(audio_buffer):
-            await ws.send_json(trans)
+        async for recog in recognize(audio_buffer):
+            await ws.send_json(recog)
 
         await ws.send_json({"type": "close"})
 

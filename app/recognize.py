@@ -1,10 +1,11 @@
-from audio import AudioBuffer
-import model
 import time
+from audio import AudioBuffer
 from collections.abc import AsyncGenerator
 from os.path import commonprefix
+from transcription import Transcription
+from model_openai_whisper import transcribe
 
-async def transcribe(
+async def recognize(
     audio: AudioBuffer,
     initial_prompt: str = "Hi,",
     init_step: float = 1.5,
@@ -16,11 +17,11 @@ async def transcribe(
         chunk = await audio.chunk(max(init_step, chunk_duration + step))
         chunk_duration = chunk.duration
 
-        trans = model.transcribe(chunk.data, initial_prompt=initial_prompt, word_timestamps=False)  
+        trans = transcribe(chunk.data, initial_prompt=initial_prompt) 
 
         if chunk.is_final:
             if len(chunk.data) > 0:
-                text = trans["text"]
+                text = trans.text
                 yield recognized(text)
             return
         
@@ -45,33 +46,36 @@ class Recognizer:
         self.prev_segments = []
         self.prev_recognizing_len = 0
 
-    def recognize(self, trans: dict):
-        text = trans["text"]
+    def recognize(self, trans: Transcription):
+        text = trans.text
         confirmed = commonprefix([self.prev_text, text])
 
-        if len(self.prev_segments) > 1 and len(trans["segments"]) > 1:
-            segment = trans["segments"][0]
-            segment_text = segment["text"]
-            # if len(confirmed) == len(self.prev_text) or len(confirmed) >= len(segment_text) + CONFIRM_THRESHOLD:
-            if len(confirmed) >= len(segment_text) and len(segment_text) == len(trans["segments"][0]["text"]):
+        if len(self.prev_segments) > 1 and len(trans.segments) > 1:
+            segment = trans.segments[0]
+            if len(confirmed) >= len(segment.text) and len(segment.text) == len(trans.segments[0].text):
                 # recongnized
-                duration = segment["end"]
-
                 self.prev_segments = self.prev_segments[1:]
-                self.prev_text = "".join([s["text"] for s in self.prev_segments])
+                self.prev_text = "".join([s.text for s in self.prev_segments])
                 self.prev_recognizing_len = 0
-            
-                return segment_text, duration
+
+                print(f"trans: {len(trans.text)}: {trans.text}")
+                for s in trans.segments:
+                    print(f"      segment: {s.text}")
+                print("   ")
+
+                return segment.text, segment.end
             else:
                 print(f"prev_text: {self.prev_text}")
                 print(f"prev_segments: {self.prev_segments}")
-                print(f"segment_text: {len(segment_text)}: {segment_text}")
+                print(f"segment_text: {len(segment.text)}: {segment.text}")
                 print(f"confirmed: {len(confirmed)}: {confirmed}")
-                print(f"trans: {trans}")
+                print(f"trans: {len(trans.text)}: {trans.text}")
+                for segment in trans.segments:
+                    print(f"      segment: {segment.text}")
                 print("   ")
  
         self.prev_text = text
-        self.prev_segments = trans["segments"]
+        self.prev_segments = trans.segments
 
         if len(confirmed.strip()) > 0 and len(confirmed) > self.prev_recognizing_len:
             self.prev_recognizing_len = len(confirmed)

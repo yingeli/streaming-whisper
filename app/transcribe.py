@@ -8,7 +8,7 @@ async def transcribe(
     audio: AudioBuffer,
     initial_prompt: str = "Hi,",
     init_step: float = 1.5,
-    step: float = 1,
+    step: float = 0.5,
 ) -> AsyncGenerator[dict, None]:
     chunk_duration = 0
     recognizer = Recognizer()
@@ -43,6 +43,7 @@ class Recognizer:
     def __init__(self) -> None:
         self.prev_text = ""
         self.prev_segments = []
+        self.prev_recognizing_len = 0
 
     def recognize(self, trans: dict):
         text = trans["text"]
@@ -58,6 +59,7 @@ class Recognizer:
 
                 self.prev_segments = self.prev_segments[1:]
                 self.prev_text = "".join([s["text"] for s in self.prev_segments])
+                self.prev_recognizing_len = 0
             
                 return segment_text, duration
             else:
@@ -71,7 +73,8 @@ class Recognizer:
         self.prev_text = text
         self.prev_segments = trans["segments"]
 
-        if len(confirmed.strip()) > 0:
+        if len(confirmed.strip()) > 0 and len(confirmed) > self.prev_recognizing_len:
+            self.prev_recognizing_len = len(confirmed)
             return confirmed, 0
         else:
             return None, 0

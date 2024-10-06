@@ -9,8 +9,8 @@ from event import RecognizingEvent, RecognizedEvent, Recognition
 async def recognize(
     audio: AudioBuffer,
     initial_prompt: str = "Hi,",
-    init_step: float = 1.5,
-    step: float = 0.5,
+    init_step: float = 1.2,
+    step: float = 0.8,
 ) -> AsyncGenerator[dict, None]:
     chunk_duration = 0
     recognizer = Recognizer()
@@ -29,7 +29,6 @@ async def recognize(
             return
         
         text, recognized_duration = recognizer.recognize(trans)
-                
         if text == None:
             continue
         
@@ -45,7 +44,7 @@ async def recognize(
             yield RecognizedEvent(recog)
         else:        
             start = chunk.start
-            end = chunk.end
+            end = chunk.start + trans.duration
             recog = Recognition(text=text, start=start, end=end, language=trans.language)
             yield RecognizingEvent(recog)
 

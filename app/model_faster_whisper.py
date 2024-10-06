@@ -15,7 +15,7 @@ def transcribe(
 ):
     with model_lock:
         #segs, info = model.transcribe(audio, beam_size=1, initial_prompt=initial_prompt, word_timestamps=False, condition_on_previous_text=False, temperature=0, length_penalty=0.0001)
-        segs, info = model.transcribe(audio, initial_prompt=initial_prompt, temperature=0)
+        segs, info = model.transcribe(audio, initial_prompt=initial_prompt, temperature=0, word_timestamps=True)
         text = ""
         segments = []
         duration = 0

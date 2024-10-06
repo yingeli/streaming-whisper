@@ -18,11 +18,11 @@ def transcribe(
     initial_prompt: str,
 ):
     with model_lock:
-        result = model.transcribe(audio, initial_prompt=initial_prompt)
+        result = model.transcribe(audio, initial_prompt=initial_prompt, condition_on_previous_text=False)
+        #result = model.transcribe(audio, initial_prompt=initial_prompt, word_timestamps=False, logprob_threshold=-0.3)
         segments = []
         for s in result["segments"]:
             segment = Segment(text=s["text"], start=s["start"], end=s["end"])
             segments.append(segment)
         trans = Transcription(text=result["text"], segments=segments, language=result["language"])
         return trans
-        

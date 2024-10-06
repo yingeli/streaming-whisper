@@ -34,7 +34,7 @@ async def recognize(
             audio.truncate(recognized_duration)
             chunk_duration -= recognized_duration        
             
-            initial_prompt = text         
+            initial_prompt = text
             
             yield recognized(text)
         else:        

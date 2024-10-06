@@ -21,8 +21,10 @@ def transcribe(
         result = model.transcribe(audio, initial_prompt=initial_prompt, temperature=0)
         #result = model.transcribe(audio, initial_prompt=initial_prompt, word_timestamps=False, logprob_threshold=-0.3)
         segments = []
+        duration = 0
         for s in result["segments"]:
             segment = Segment(text=s["text"], start=s["start"], end=s["end"])
             segments.append(segment)
-        trans = Transcription(text=result["text"], segments=segments, language=result["language"])
+            duration = s["end"]
+        trans = Transcription(text=result["text"], duration=duration, language=result["language"], segments=segments)
         return trans

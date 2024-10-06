@@ -4,6 +4,7 @@ from collections.abc import AsyncGenerator
 from os.path import commonprefix
 from transcription import Transcription
 from model_openai_whisper import transcribe
+from event import RecognizingEvent, RecognizedEvent, Recognition
 
 async def recognize(
     audio: AudioBuffer,
@@ -21,8 +22,10 @@ async def recognize(
 
         if chunk.is_final:
             if len(chunk.data) > 0:
-                text = trans.text
-                yield recognized(text)
+                start = chunk.start
+                end = chunk.start + trans.duration
+                recog = Recognition(text=trans.text, start=start, end=end, language=trans.language)
+                yield RecognizedEvent(recog)
             return
         
         text, recognized_duration = recognizer.recognize(trans)
@@ -35,10 +38,16 @@ async def recognize(
             chunk_duration -= recognized_duration        
             
             initial_prompt = text
-            
-            yield recognized(text)
+
+            start = chunk.start
+            end = chunk.start + recognized_duration
+            recog = Recognition(text=text, start=start, end=end, language=trans.language)
+            yield RecognizedEvent(recog)
         else:        
-            yield recognizing(text)
+            start = chunk.start
+            end = chunk.end
+            recog = Recognition(text=text, start=start, end=end, language=trans.language)
+            yield RecognizingEvent(recog)
 
 class Recognizer:
     def __init__(self) -> None:
@@ -65,15 +74,3 @@ class Recognizer:
             return confirmed, 0
         else:
             return None, 0
-
-def recognized(text):
-    return {
-        "type": "recognized",
-        "result": text,
-    }
-
-def recognizing(text):
-    return {
-        "type": "recognizing",
-        "result": text,
-    }

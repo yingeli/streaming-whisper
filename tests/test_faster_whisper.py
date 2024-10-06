@@ -1,8 +1,7 @@
 from faster_whisper import WhisperModel
 import time
 
-#model_size = "../models/faster-whisper-large-v3-turbo"
-model_size = "large-v3"
+model_size = "deepdml/faster-whisper-large-v3-turbo-ct2"
 # Run on GPU with FP16
 model = WhisperModel(model_size, device="cuda")
 
@@ -12,7 +11,7 @@ model = WhisperModel(model_size, device="cuda")
 # model = WhisperModel(model_size, device="cpu", compute_type="int8")
 
 start = time.time()
-segments, info = model.transcribe("./audio/oppo-th-th.wav", initial_prompt="Hi,")
+segments, info = model.transcribe("./audio/oppo-en-us.wav", temperature=0, initial_prompt="Hello,")
 
 print("Detected language '%s' with probability %f" % (info.language, info.language_probability))
 

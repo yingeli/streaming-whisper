@@ -11,7 +11,7 @@ WEBSOCKET_SERVER_URL = 'ws://localhost:8000/v1/realtime'  # Replace with your We
 async def transcribe():
     # Open the WAV file in read mode
     start = time.time()
-    with wave.open("./audio/oppo-zh-cn.wav", 'rb') as wf:       
+    with wave.open("./audio/oppo-en-us.wav", 'rb') as wf:       
         #async with websockets.connect(WEBSOCKET_SERVER_URL, open_timeout=None, close_timeout=None, ping_interval=None) as ws:
         async with websockets.connect(WEBSOCKET_SERVER_URL) as ws:
             async with asyncio.TaskGroup() as tg:

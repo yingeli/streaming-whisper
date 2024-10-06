@@ -4,8 +4,7 @@ from threading import Lock
 from faster_whisper import WhisperModel
 from transcription import Transcription, Segment
 
-#model_size = "/home/coder/streaming-whisper/models/faster-whisper-large-v3-turbo"
-model_size = "large-v2"
+model_size = "deepdml/faster-whisper-large-v3-turbo-ct2"
 model = WhisperModel(model_size, device="cuda")
 
 model_lock = Lock()
@@ -16,7 +15,7 @@ def transcribe(
 ):
     with model_lock:
         #segs, info = model.transcribe(audio, beam_size=1, initial_prompt=initial_prompt, word_timestamps=False, condition_on_previous_text=False, temperature=0, length_penalty=0.0001)
-        segs, info = model.transcribe(audio, initial_prompt=initial_prompt, word_timestamps=False, condition_on_previous_text=False)
+        segs, info = model.transcribe(audio, initial_prompt=initial_prompt, temperature=0)
         text = ""
         segments = []
         for s in segs:

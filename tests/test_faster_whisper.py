@@ -11,7 +11,7 @@ model = WhisperModel(model_size, device="cuda")
 # model = WhisperModel(model_size, device="cpu", compute_type="int8")
 
 start = time.time()
-segments, info = model.transcribe("./audio/oppo-en-us.wav", temperature=0, initial_prompt="Hello,")
+segments, info = model.transcribe("./audio/en-us.wav", temperature=0, initial_prompt="Hello,")
 
 print("Detected language '%s' with probability %f" % (info.language, info.language_probability))
 

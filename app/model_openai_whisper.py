@@ -18,7 +18,7 @@ def transcribe(
     initial_prompt: str,
 ):
     with model_lock:
-        result = model.transcribe(audio, initial_prompt=initial_prompt, condition_on_previous_text=False)
+        result = model.transcribe(audio, initial_prompt=initial_prompt, condition_on_previous_text=False, word_timestamps=False)
         #result = model.transcribe(audio, initial_prompt=initial_prompt, word_timestamps=False, logprob_threshold=-0.3)
         segments = []
         for s in result["segments"]:

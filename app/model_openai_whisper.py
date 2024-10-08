@@ -20,18 +20,6 @@ def transcribe(
     initial_prompt: str,
 ):
     with model_lock:
-<<<<<<< HEAD
-        result = model.transcribe(audio, initial_prompt=initial_prompt, temperature=0)
-        #result = model.transcribe(audio, initial_prompt=initial_prompt, word_timestamps=False, logprob_threshold=-0.3)
-        segments = []
-        duration = 0
-        for s in result["segments"]:
-            segment = Segment(text=s["text"], start=s["start"], end=s["end"])
-            segments.append(segment)
-            duration = s["end"]
-        trans = Transcription(text=result["text"], duration=duration, language=result["language"], segments=segments)
-        return trans
-=======
         result = model.transcribe(audio, initial_prompt=initial_prompt, temperature=0, word_timestamps=True)
 
     segments = []
@@ -41,15 +29,15 @@ def transcribe(
         words = []
         segment_text = ""
         for w in s["words"]:
-            if w["start"] >= s["end"]:
-                end_detected = True
-                break
+            #if w["start"] >= s["end"]:
+            #    end_detected = True
+            #    break
             word = Word(text=w["word"], start=w["start"], end=w["end"])
             words.append(word)
             segment_text += word.text
         
-        if len(words) == 0:
-            break
+        #if len(words) == 0:
+        #    break
         
         segment = Segment(start=s["start"], end=words[-1].end, words=words)
         segments.append(segment)
@@ -69,9 +57,7 @@ def trim(trans, trim_threshold=0.1) -> None:
             word = segment.words[-1]
             if word.start + trim_threshold < segment.end:
                 break
-            print(f"Trimming word: {word.text} from {segment.text}")
             segment.words.pop()
         if len(segment.words) > 0:
             break
         trans.segments.pop()
->>>>>>> 2fe0533 (dev)

@@ -16,12 +16,6 @@ def transcribe(
 ):
     with model_lock:
         #segs, info = model.transcribe(audio, beam_size=1, initial_prompt=initial_prompt, word_timestamps=False, condition_on_previous_text=False, temperature=0, length_penalty=0.0001)
-<<<<<<< HEAD
-        segs, info = model.transcribe(audio, initial_prompt=initial_prompt, temperature=0, word_timestamps=True)
-        text = ""
-        segments = []
-        duration = 0
-=======
         segs, info = model.transcribe(audio, 
                                       initial_prompt=initial_prompt, 
                                       temperature=0, 
@@ -30,9 +24,6 @@ def transcribe(
                                       )
 
         segments = []
-        #text = ""
-        end_detected = False
->>>>>>> 2fe0533 (dev)
         for s in segs:
             words = []
             for w in s.words:
@@ -47,15 +38,6 @@ def transcribe(
         
             segment = Segment(start=s.start, end=s.end, words=words)
             segments.append(segment)
-<<<<<<< HEAD
-            duration = s.end
-        trans = Transcription(text=text, duration=duration, segments=segments, language=info.language)
-        return trans
-=======
-            #text += segment.text
-                
-            if end_detected:
-                break
     
         trans = Transcription(duration=info.duration, language=info.language, segments=segments)
         trim(trans)
@@ -72,5 +54,3 @@ def trim(trans, trim_threshold=0.1) -> None:
         if len(segment.words) > 0:
             break
         trans.segments.pop()
-
->>>>>>> 2fe0533 (dev)

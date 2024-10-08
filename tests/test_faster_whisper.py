@@ -11,9 +11,6 @@ model = WhisperModel(model_size, device="cuda", compute_type="float16")
 # model = WhisperModel(model_size, device="cpu", compute_type="int8")
 
 start = time.time()
-<<<<<<< HEAD
-segments, info = model.transcribe("./audio/en-us.wav", temperature=0, initial_prompt="Hi,")
-=======
 segments, info = model.transcribe("./audio/en-us.wav", 
     #beam_size=5,
     temperature=0,  
@@ -22,7 +19,6 @@ segments, info = model.transcribe("./audio/en-us.wav",
     condition_on_previous_text=False, 
     #vad_filter=True,
     )
->>>>>>> 2fe0533 (dev)
 
 print("Detected language '%s' with probability %f" % (info.language, info.language_probability))
 

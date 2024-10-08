@@ -26,7 +26,12 @@ async def realtime_transcribe(ws: WebSocket):
         async for evt in recognize(audio_buffer):
             await ws.send_json(evt.to_dict())
 
+<<<<<<< HEAD
         await ws.send_json(CompletedEvent().to_dict)
+=======
+        completed = CompletedEvent()
+        await ws.send_json(completed.to_dict())
+>>>>>>> 2fe0533 (dev)
 
         #await ws.close()
 

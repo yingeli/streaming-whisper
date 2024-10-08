@@ -5,6 +5,10 @@ class Recognition:
         self.end = end
         self.language = language
 
+    @property
+    def duration(self):
+        return self.end - self.start
+
     def to_dict(self):
         return {
             "text": self.text.strip(),

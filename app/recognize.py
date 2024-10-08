@@ -3,7 +3,7 @@ from audio import AudioBuffer
 from collections.abc import AsyncGenerator
 from os.path import commonprefix
 from transcription import Transcription
-from model_openai_whisper import transcribe
+from model_faster_whisper import transcribe
 from event import RecognizingEvent, RecognizedEvent, Recognition
 
 async def recognize(
@@ -19,6 +19,8 @@ async def recognize(
         chunk_duration = chunk.duration
 
         trans = transcribe(chunk.data, initial_prompt=initial_prompt)
+        if trans.duration == 0:
+            continue
 
         if chunk.is_final:
             if len(chunk.data) > 0:
@@ -28,48 +30,50 @@ async def recognize(
                 yield RecognizedEvent(recog)
             return
         
-        text, recognized_duration = recognizer.recognize(trans)
-        if text == None:
+        text, duration, recognized = recognizer.recognize(trans)
+        if duration == 0:
             continue
         
-        if recognized_duration > 0:
-            audio.truncate(recognized_duration)
-            chunk_duration -= recognized_duration        
-            
-            initial_prompt = text
+        recog = Recognition(text=text, start=chunk.start, end=chunk.start + duration, language=trans.language)
+        if recognized:
+            audio.truncate(duration)
+            chunk_duration -= duration
 
-            start = chunk.start
-            end = chunk.start + recognized_duration
-            recog = Recognition(text=text, start=start, end=end, language=trans.language)
-            yield RecognizedEvent(recog)
-        else:        
-            start = chunk.start
-            end = chunk.start + trans.duration
-            recog = Recognition(text=text, start=start, end=end, language=trans.language)
-            yield RecognizingEvent(recog)
+            initial_prompt = text
+            
+            yield RecognizedEvent(recog)     
+        else:
+            yield RecognizingEvent(recog)     
 
 class Recognizer:
     def __init__(self) -> None:
         self.prev_text = ""
-        self.prev_recognizing_len = 0
+        self.prev_segments = []
 
     def recognize(self, trans: Transcription):
-        text = trans.text
-        confirmed = commonprefix([self.prev_text, text])
+        if len(trans.segments) == 0:
+            return "", 0, False
+        
+        words = trans.segments[0].words
+        for i in range(len(words)-1, -1, -1):
+            word = words[i]
+            if word.text[-1] in [".", "。", "?", "？", "!", "！"]:
+                text = "".join([w.text for w in words[:i+1]])
+                if self.prev_text.startswith(text):
+                    self.prev_segments = []
+                    self.prev_text = "".join([w.text for w in words[i+1:]]).join([s.text for s in trans.segments[1:]])
+                    return text, word.end, True
 
-        if len(trans.segments) > 1:
+        if len(trans.segments) > 1 and len(self.prev_segments) > 1:
             segment = trans.segments[0]
-            if len(confirmed) >= len(segment.text):
-                # recongnized
-                self.prev_text = "".join([s.text for s in trans.segments[1:]])
-                self.prev_recognizing_len = 0
+            if segment.text == self.prev_segments[0].text:
+                self.prev_segments = trans.segments[1:]
+                self.prev_text = "".join([segment.text for segment in self.prev_segments])
+                return segment.text, segment.words[-1].end, True
+        
+        if trans.text == self.prev_text:
+            return "", 0, False
 
-                return segment.text, segment.end
- 
-        self.prev_text = text
-
-        if len(confirmed.strip()) > 0 and len(confirmed) > self.prev_recognizing_len:
-            self.prev_recognizing_len = len(confirmed)
-            return confirmed, 0
-        else:
-            return None, 0
+        self.prev_text = trans.text
+        self.prev_segments = trans.segments
+        return trans.text, trans.duration, False

@@ -12,7 +12,7 @@ async def transcribe():
     # Open the WAV file in read mode
     start = time.time()
 
-    with wave.open("./audio/en-us.wav", 'rb') as wf:       
+    with wave.open("./audio/hi-in.wav", 'rb') as wf:       
         #async with websockets.connect(WEBSOCKET_SERVER_URL, open_timeout=None, close_timeout=None, ping_interval=None) as ws:
         async with websockets.connect(WEBSOCKET_SERVER_URL) as ws:
             async with asyncio.TaskGroup() as tg:

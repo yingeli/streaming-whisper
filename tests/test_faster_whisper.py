@@ -1,9 +1,11 @@
 from faster_whisper import WhisperModel
 import time
 
-model_size = "deepdml/faster-whisper-large-v3-turbo-ct2"
+model_size = "large-v3-turbo"
 # Run on GPU with FP16
-model = WhisperModel(model_size, device="cuda", compute_type="float16")
+#model = WhisperModel(model_size, device="cuda", compute_type="float16")
+
+model = WhisperModel(model_size, device="cpu")
 
 # or run on GPU with INT8
 # model = WhisperModel(model_size, device="cuda", compute_type="int8_float16")
@@ -13,10 +15,10 @@ model = WhisperModel(model_size, device="cuda", compute_type="float16")
 start = time.time()
 segments, info = model.transcribe("./audio/en-us.wav", 
     #beam_size=5,
-    temperature=0,  
-    initial_prompt="Hi,", 
-    word_timestamps=True,
-    condition_on_previous_text=False, 
+    #temperature=0,  
+    #initial_prompt="Hi,", 
+    #word_timestamps=True,
+    #condition_on_previous_text=False, 
     #vad_filter=True,
     )
 

@@ -9,7 +9,7 @@ from event import RecognizingEvent, RecognizedEvent, Recognition
 async def recognize(
     audio: AudioBuffer,
     initial_prompt: str = "Hi,",
-    init_step: float = 1.2,
+    init_step: float = 1.7,
     step: float = 0.8,
 ) -> AsyncGenerator[dict, None]:
     chunk_duration = 0
